@@ -31,8 +31,8 @@ Accumulez de l'XP, montez de niveau, et devenez une **Légende** !
 # Compiler et packager
 mvn package -q
 
-# Lancer
-java -jar target/taskquest.jar
+# Lancer (fat JAR incluant toutes les dépendances)
+java -jar target/taskquest-full.jar
 ```
 
 Ou depuis un IDE (IntelliJ, Eclipse, VS Code) : exécuter la classe `com.taskquest.Main`.
