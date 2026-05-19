@@ -109,11 +109,6 @@ public class Player {
             unlockedRewards.add(reward);
         }
 
-        // Au niveau max, on conserve l'XP sans la perdre
-        if (level == MAX_LEVEL) {
-            currentXP = totalXP;
-        }
-
         return unlockedRewards;
     }
 
