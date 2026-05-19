@@ -1,0 +1,28 @@
+# Dossiers de build Maven
+target/
+
+# Dossiers de build IntelliJ / Eclipse
+out/
+build/
+
+# Fichiers de configuration IDE
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+
+# Fichiers de configuration VS Code
+.vscode/
+
+# Fichiers système macOS
+.DS_Store
+
+# Fichiers système Windows
+Thumbs.db
+
+# Fichiers de log
+*.log
+
+# Données de l'application (optionnel : conserver data/ pour tests)
+# data/

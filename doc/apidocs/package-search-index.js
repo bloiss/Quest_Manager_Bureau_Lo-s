@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html","k":"18"},{"l":"com.taskquest"},{"l":"com.taskquest.controller"},{"l":"com.taskquest.exception"},{"l":"com.taskquest.model"},{"l":"com.taskquest.repository"},{"l":"com.taskquest.view"}];updateSearchResults();
