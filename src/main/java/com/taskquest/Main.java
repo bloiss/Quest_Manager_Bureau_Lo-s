@@ -26,6 +26,11 @@ import java.nio.file.Paths;
  */
 public class Main {
 
+    /**
+     * Constructeur privé — classe utilitaire non instanciable.
+     */
+    private Main() { }
+
     /** Dossier de stockage des données de l'application. */
     private static final Path DATA_DIR = Paths.get("data");
 
