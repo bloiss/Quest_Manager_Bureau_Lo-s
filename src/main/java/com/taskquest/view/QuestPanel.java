@@ -44,6 +44,12 @@ public class QuestPanel extends JPanel {
     /** Cache de la liste des quêtes pour les actions (complétion, suppression). */
     private List<Quest> currentQuests;
 
+    /** Menu déroulant de filtre par statut. */
+        private JComboBox<String> filterCombo;
+
+        /** Menu déroulant de tri. */
+        private JComboBox<String> sortCombo;
+
     // Noms des colonnes du tableau
     private static final String[] COLUMN_NAMES = {"Titre", "Type", "XP", "Statut"};
 
@@ -83,7 +89,24 @@ public class QuestPanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(questTable);
         scrollPane.setPreferredSize(new Dimension(600, 300));
+        // --- Panneau de filtre ---
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        filterPanel.add(new JLabel("Filtrer :"));
+        filterCombo = new JComboBox<>(new String[]{
+            "Toutes", "À faire", "En cours", "Terminées"
+        });
+        filterPanel.add(filterCombo);
+        filterPanel.add(new JLabel("  Trier par :"));
+        sortCombo = new JComboBox<>(new String[]{
+            "Ordre naturel", "Titre (A→Z)", "XP (décroissant)", "Type"
+        });
+        filterPanel.add(sortCombo);
+        filterCombo.addActionListener(e -> applyFilter());
+        sortCombo.addActionListener(e -> applyFilter());
+        add(filterPanel, BorderLayout.NORTH);
+
         add(scrollPane, BorderLayout.CENTER);
+
 
         // --- Panneau de boutons ---
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
@@ -212,4 +235,25 @@ public class QuestPanel extends JPanel {
             case DONE -> "Terminée";
         };
     }
+    /**
+     * Applique le filtre et le tri sélectionnés et rafraîchit le tableau.
+     */
+    private void applyFilter() {
+        QuestStatus statusFilter = switch (filterCombo.getSelectedIndex()) {
+            case 1 -> QuestStatus.TODO;
+            case 2 -> QuestStatus.IN_PROGRESS;
+            case 3 -> QuestStatus.DONE;
+            default -> null;
+        };
+
+        String sortBy = switch (sortCombo.getSelectedIndex()) {
+            case 1 -> "title";
+            case 2 -> "xp";
+            case 3 -> "type";
+            default -> null;
+        };
+
+        refresh(questController.getFilteredAndSorted(statusFilter, sortBy));
+    }
+
 }
