@@ -63,29 +63,32 @@ public class QuestController {
     public List<Quest> getAllQuests() {
         return List.copyOf(quests);
     }
-/**
- * Retourne les quêtes filtrées par statut et triées selon un critère.
- *
- * @param statusFilter le statut souhaité, ou {@code null} pour toutes les quêtes
- * @param sortBy       "title", "xp", "type", ou {@code null} pour l'ordre naturel
- * @return la liste filtrée et triée
- */
-public List<Quest> getFilteredAndSorted(QuestStatus statusFilter, String sortBy) {
-    List<Quest> result = quests.stream()
-        .filter(q -> statusFilter == null || q.getStatus() == statusFilter)
-        .collect(java.util.stream.Collectors.toList());
+    /**
+     * Retourne les quêtes filtrées par statut et/ou catégorie, triées selon un critère.
+     *
+     * @param statusFilter   le statut souhaité, ou {@code null} pour tous les statuts
+     * @param sortBy         "title", "xp", "type", ou {@code null} pour l'ordre naturel
+     * @param categoryFilter la catégorie souhaitée, ou {@code null} pour toutes les catégories
+     * @return la liste filtrée et triée
+     */
+    public List<Quest> getFilteredAndSorted(QuestStatus statusFilter, String sortBy,
+                                            QuestCategory categoryFilter) {
+        List<Quest> result = quests.stream()
+            .filter(q -> statusFilter == null || q.getStatus() == statusFilter)
+            .filter(q -> categoryFilter == null || q.getCategory() == categoryFilter)
+            .collect(java.util.stream.Collectors.toList());
 
-    if ("title".equals(sortBy)) {
-        result.sort(java.util.Comparator.comparing(Quest::getTitle,
-            String.CASE_INSENSITIVE_ORDER));
-    } else if ("xp".equals(sortBy)) {
-        result.sort(java.util.Comparator.comparingInt(Quest::getXpReward).reversed());
-    } else if ("type".equals(sortBy)) {
-        result.sort(java.util.Comparator.comparing(Quest::isRecurring));
+        if ("title".equals(sortBy)) {
+            result.sort(java.util.Comparator.comparing(Quest::getTitle,
+                String.CASE_INSENSITIVE_ORDER));
+        } else if ("xp".equals(sortBy)) {
+            result.sort(java.util.Comparator.comparingInt(Quest::getXpReward).reversed());
+        } else if ("type".equals(sortBy)) {
+            result.sort(java.util.Comparator.comparing(Quest::isRecurring));
+        }
+
+        return result;
     }
-
-    return result;
-}
 
     /**
      * Crée et ajoute une nouvelle quête à la liste, puis la persiste.
@@ -94,10 +97,12 @@ public List<Quest> getFilteredAndSorted(QuestStatus statusFilter, String sortBy)
      * @param description la description de la quête
      * @param xpReward    la récompense XP
      * @param isDaily     {@code true} pour une quête quotidienne, {@code false} pour unique
+     * @param category    la catégorie de la quête (utilise {@link QuestCategory#GENERAL} si null)
      * @throws InvalidQuestException  si les données sont invalides
      * @throws DataCorruptedException si la sauvegarde échoue
      */
-    public void createQuest(String title, String description, int xpReward, boolean isDaily)
+    public void createQuest(String title, String description, int xpReward,
+                            boolean isDaily, QuestCategory category)
             throws InvalidQuestException, DataCorruptedException {
 
         validateQuestData(title, description, xpReward);
@@ -106,6 +111,7 @@ public List<Quest> getFilteredAndSorted(QuestStatus statusFilter, String sortBy)
             ? new DailyQuest(title.trim(), description.trim(), xpReward)
             : new OneTimeQuest(title.trim(), description.trim(), xpReward);
 
+        quest.setCategory(category != null ? category : QuestCategory.GENERAL);
         quests.add(quest);
         questRepository.saveAll(quests);
     }

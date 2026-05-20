@@ -4,6 +4,7 @@ import com.taskquest.controller.QuestController;
 import com.taskquest.exception.DataCorruptedException;
 import com.taskquest.exception.InvalidQuestException;
 import com.taskquest.model.Quest;
+import com.taskquest.model.QuestCategory;
 import com.taskquest.model.QuestStatus;
 import com.taskquest.model.Reward;
 
@@ -48,14 +49,17 @@ public class QuestPanel extends JPanel {
     /** Menu déroulant de filtre par statut. */
         private JComboBox<String> filterCombo;
 
-        /** Menu déroulant de tri. */
-        private JComboBox<String> sortCombo;
+    /** Menu déroulant de tri. */
+    private JComboBox<String> sortCombo;
+
+    /** Menu déroulant de filtre par catégorie. */
+    private JComboBox<String> categoryCombo;
 
     /** Formateur de date pour la colonne "Complétée le". */
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     // Noms des colonnes du tableau
-    private static final String[] COLUMN_NAMES = {"Titre", "Type", "XP", "Statut", "Complétée le"};
+    private static final String[] COLUMN_NAMES = {"Titre", "Catégorie", "Type", "XP", "Statut", "Complétée le"};
 
     /**
      * Construit le panneau de gestion des quêtes.
@@ -105,8 +109,17 @@ public class QuestPanel extends JPanel {
             "Ordre naturel", "Titre (A→Z)", "XP (décroissant)", "Type"
         });
         filterPanel.add(sortCombo);
+        filterPanel.add(new JLabel("  Catégorie :"));
+        String[] categoryItems = new String[QuestCategory.values().length + 1];
+        categoryItems[0] = "Toutes";
+        for (int i = 0; i < QuestCategory.values().length; i++) {
+            categoryItems[i + 1] = QuestCategory.values()[i].getLabel();
+        }
+        categoryCombo = new JComboBox<>(categoryItems);
+        filterPanel.add(categoryCombo);
         filterCombo.addActionListener(e -> applyFilter());
         sortCombo.addActionListener(e -> applyFilter());
+        categoryCombo.addActionListener(e -> applyFilter());
         add(filterPanel, BorderLayout.NORTH);
 
         add(scrollPane, BorderLayout.CENTER);
@@ -145,6 +158,7 @@ public class QuestPanel extends JPanel {
                 : "";
             tableModel.addRow(new Object[]{
                 quest.getTitle(),
+                quest.getCategory().getLabel(),
                 type,
                 quest.getXpReward() + " XP",
                 formatStatus(quest.getStatus()),
@@ -166,7 +180,8 @@ public class QuestPanel extends JPanel {
                     dialog.getQuestTitle(),
                     dialog.getQuestDescription(),
                     dialog.getXpReward(),
-                    dialog.isDaily()
+                    dialog.isDaily(),
+                    dialog.getCategory()
                 );
                 mainWindow.refreshQuestPanel();
             } catch (InvalidQuestException e) {
@@ -261,7 +276,11 @@ public class QuestPanel extends JPanel {
             default -> null;
         };
 
-        refresh(questController.getFilteredAndSorted(statusFilter, sortBy));
+        QuestCategory categoryFilter = categoryCombo.getSelectedIndex() == 0
+            ? null
+            : QuestCategory.values()[categoryCombo.getSelectedIndex() - 1];
+
+        refresh(questController.getFilteredAndSorted(statusFilter, sortBy, categoryFilter));
     }
 
 }
