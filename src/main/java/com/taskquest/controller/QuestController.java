@@ -5,7 +5,13 @@ import com.taskquest.exception.InvalidQuestException;
 import com.taskquest.model.*;
 import com.taskquest.repository.QuestRepository;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -169,6 +175,52 @@ public class QuestController {
      */
     public void saveQuests() throws DataCorruptedException {
         questRepository.saveAll(quests);
+    }
+
+    /**
+     * Exporte l'historique des quêtes terminées dans un fichier CSV.
+     *
+     * <p>Le fichier contient les colonnes : Titre, Catégorie, Type, XP, Complétée le.</p>
+     *
+     * @param filePath le chemin du fichier CSV à créer ou écraser
+     * @throws DataCorruptedException si l'écriture du fichier échoue
+     */
+    public void exportToCSV(Path filePath) throws DataCorruptedException {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        List<String> lines = new ArrayList<>();
+        lines.add("Titre,Catégorie,Type,XP,Complétée le");
+
+        for (Quest quest : quests) {
+            if (quest.getStatus() != QuestStatus.DONE) continue;
+            String titre = escapeCsv(quest.getTitle());
+            String categorie = escapeCsv(quest.getCategory().getLabel());
+            String type = quest.isRecurring() ? "Quotidienne" : "Unique";
+            String xp = String.valueOf(quest.getXpReward());
+            String date = quest.getCompletedAt() != null
+                ? quest.getCompletedAt().format(fmt) : "";
+            lines.add(titre + "," + categorie + "," + type + "," + xp + "," + date);
+        }
+
+        try {
+            Files.write(filePath, lines, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new DataCorruptedException("Impossible d'écrire le fichier CSV : " + filePath, e);
+        }
+    }
+
+    /**
+     * Échappe une valeur pour l'inclure dans un fichier CSV
+     * (entoure de guillemets si elle contient une virgule ou des guillemets).
+     *
+     * @param value la valeur à échapper
+     * @return la valeur prête pour le CSV
+     */
+    private String escapeCsv(String value) {
+        if (value == null) return "";
+        if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
+            return "\"" + value.replace("\"", "\"\"") + "\"";
+        }
+        return value;
     }
 
     /**

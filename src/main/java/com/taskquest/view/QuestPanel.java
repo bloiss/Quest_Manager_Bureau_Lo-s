@@ -12,6 +12,8 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.File;
+import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -131,14 +133,17 @@ public class QuestPanel extends JPanel {
         JButton btnCreate = new JButton("Nouvelle quête");
         JButton btnComplete = new JButton("Terminer");
         JButton btnDelete = new JButton("Supprimer");
+        JButton btnExport = new JButton("Exporter CSV");
 
         btnCreate.addActionListener(e -> openCreateDialog());
         btnComplete.addActionListener(e -> completeSelectedQuest());
         btnDelete.addActionListener(e -> deleteSelectedQuest());
+        btnExport.addActionListener(e -> exportToCSV());
 
         buttonPanel.add(btnCreate);
         buttonPanel.add(btnComplete);
         buttonPanel.add(btnDelete);
+        buttonPanel.add(btnExport);
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
@@ -258,6 +263,33 @@ public class QuestPanel extends JPanel {
             case DONE -> "Terminée";
         };
     }
+    /**
+     * Ouvre un sélecteur de fichier et exporte l'historique des quêtes terminées en CSV.
+     */
+    private void exportToCSV() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Exporter l'historique en CSV");
+        chooser.setSelectedFile(new File("historique_quetes.csv"));
+        chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+            "Fichiers CSV (*.csv)", "csv"));
+
+        if (chooser.showSaveDialog(mainWindow) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        Path filePath = chooser.getSelectedFile().toPath();
+        if (!filePath.toString().endsWith(".csv")) {
+            filePath = filePath.resolveSibling(filePath.getFileName() + ".csv");
+        }
+
+        try {
+            questController.exportToCSV(filePath);
+            mainWindow.showInfo("Export réussi !\n" + filePath.toAbsolutePath());
+        } catch (com.taskquest.exception.DataCorruptedException e) {
+            mainWindow.showError("Erreur lors de l'export : " + e.getMessage());
+        }
+    }
+
     /**
      * Applique le filtre et le tri sélectionnés et rafraîchit le tableau.
      */
