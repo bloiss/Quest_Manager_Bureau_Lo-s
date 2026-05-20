@@ -1,5 +1,6 @@
 package com.taskquest.model;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -42,6 +43,8 @@ public abstract class Quest {
     /** Statut actuel de la quête. */
     private QuestStatus status;
 
+    /** Date et heure de complétion (null si pas encore terminée). */
+    private LocalDateTime completedAt;
     /**
      * Construit une nouvelle quête avec les paramètres donnés.
      *
@@ -173,6 +176,24 @@ public abstract class Quest {
      */
     public void setStatus(QuestStatus status) {
         this.status = status;
+    }
+
+    /**
+     * Retourne la date et heure de complétion de la quête.
+     *
+     * @return la date/heure de complétion, ou {@code null} si non terminée
+     */
+    public LocalDateTime getCompletedAt() {
+        return completedAt;
+    }
+
+    /**
+     * Définit la date et heure de complétion.
+     *
+     * @param completedAt la date/heure de complétion
+     */
+    public void setCompletedAt(LocalDateTime completedAt) {
+        this.completedAt = completedAt;
     }
 
     @Override

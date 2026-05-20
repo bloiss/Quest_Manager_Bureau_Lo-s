@@ -10,6 +10,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +41,7 @@ public class JsonQuestRepository implements QuestRepository {
         this.filePath = filePath;
         this.gson = new GsonBuilder()
             .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .setPrettyPrinting()
             .create();
     }
@@ -128,7 +130,12 @@ public class JsonQuestRepository implements QuestRepository {
             int xpReward = obj.get("xpReward").getAsInt();
             QuestStatus status = QuestStatus.valueOf(obj.get("status").getAsString());
 
-            return switch (type) {
+            LocalDateTime completedAt = null;
+            if (obj.has("completedAt") && !obj.get("completedAt").isJsonNull()) {
+                completedAt = LocalDateTime.parse(obj.get("completedAt").getAsString());
+            }
+
+            Quest result = switch (type) {
                 case "OneTimeQuest" -> new OneTimeQuest(id, title, description, xpReward, status);
                 case "DailyQuest" -> {
                     LocalDate lastCompleted = null;
@@ -139,6 +146,8 @@ public class JsonQuestRepository implements QuestRepository {
                 }
                 default -> throw new DataCorruptedException("Type de quête inconnu : " + type);
             };
+            result.setCompletedAt(completedAt);
+            return result;
 
         } catch (NullPointerException | IllegalArgumentException e) {
             throw new DataCorruptedException("Champ manquant ou invalide dans le fichier JSON", e);
@@ -162,6 +171,26 @@ public class JsonQuestRepository implements QuestRepository {
         public LocalDate deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             return LocalDate.parse(json.getAsString());
+        }
+    }
+
+    // --- Adaptateur interne pour LocalDateTime ---
+
+    /**
+     * Adaptateur Gson pour sérialiser/désérialiser {@link LocalDateTime} en ISO-8601.
+     */
+    private static class LocalDateTimeAdapter
+            implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
+
+        @Override
+        public JsonElement serialize(LocalDateTime src, Type typeOfSrc, JsonSerializationContext ctx) {
+            return new JsonPrimitive(src.toString());
+        }
+
+        @Override
+        public LocalDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
+                throws JsonParseException {
+            return LocalDateTime.parse(json.getAsString());
         }
     }
 }
