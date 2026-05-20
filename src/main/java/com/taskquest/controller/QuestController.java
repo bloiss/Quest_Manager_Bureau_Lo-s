@@ -62,6 +62,29 @@ public class QuestController {
     public List<Quest> getAllQuests() {
         return List.copyOf(quests);
     }
+/**
+ * Retourne les quêtes filtrées par statut et triées selon un critère.
+ *
+ * @param statusFilter le statut souhaité, ou {@code null} pour toutes les quêtes
+ * @param sortBy       "title", "xp", "type", ou {@code null} pour l'ordre naturel
+ * @return la liste filtrée et triée
+ */
+public List<Quest> getFilteredAndSorted(QuestStatus statusFilter, String sortBy) {
+    List<Quest> result = quests.stream()
+        .filter(q -> statusFilter == null || q.getStatus() == statusFilter)
+        .collect(java.util.stream.Collectors.toList());
+
+    if ("title".equals(sortBy)) {
+        result.sort(java.util.Comparator.comparing(Quest::getTitle,
+            String.CASE_INSENSITIVE_ORDER));
+    } else if ("xp".equals(sortBy)) {
+        result.sort(java.util.Comparator.comparingInt(Quest::getXpReward).reversed());
+    } else if ("type".equals(sortBy)) {
+        result.sort(java.util.Comparator.comparing(Quest::isRecurring));
+    }
+
+    return result;
+}
 
     /**
      * Crée et ajoute une nouvelle quête à la liste, puis la persiste.
