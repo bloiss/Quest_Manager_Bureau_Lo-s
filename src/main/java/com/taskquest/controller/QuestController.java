@@ -5,6 +5,7 @@ import com.taskquest.exception.InvalidQuestException;
 import com.taskquest.model.*;
 import com.taskquest.repository.QuestRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -128,6 +129,7 @@ public List<Quest> getFilteredAndSorted(QuestStatus statusFilter, String sortBy)
         }
 
         quest.setStatus(QuestStatus.DONE);
+        quest.setCompletedAt(LocalDateTime.now());
         if (quest instanceof DailyQuest daily) {
             daily.markCompletedToday();
         }

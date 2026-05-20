@@ -11,6 +11,7 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -50,8 +51,11 @@ public class QuestPanel extends JPanel {
         /** Menu déroulant de tri. */
         private JComboBox<String> sortCombo;
 
+    /** Formateur de date pour la colonne "Complétée le". */
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
     // Noms des colonnes du tableau
-    private static final String[] COLUMN_NAMES = {"Titre", "Type", "XP", "Statut"};
+    private static final String[] COLUMN_NAMES = {"Titre", "Type", "XP", "Statut", "Complétée le"};
 
     /**
      * Construit le panneau de gestion des quêtes.
@@ -136,11 +140,15 @@ public class QuestPanel extends JPanel {
 
         for (Quest quest : quests) {
             String type = quest.isRecurring() ? "Quotidienne" : "Unique";
+            String completedAt = quest.getCompletedAt() != null
+                ? quest.getCompletedAt().format(DATE_FMT)
+                : "";
             tableModel.addRow(new Object[]{
                 quest.getTitle(),
                 type,
                 quest.getXpReward() + " XP",
-                formatStatus(quest.getStatus())
+                formatStatus(quest.getStatus()),
+                completedAt
             });
         }
     }
