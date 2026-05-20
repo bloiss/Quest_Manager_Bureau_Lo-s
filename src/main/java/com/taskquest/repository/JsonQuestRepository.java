@@ -147,6 +147,13 @@ public class JsonQuestRepository implements QuestRepository {
                 default -> throw new DataCorruptedException("Type de quête inconnu : " + type);
             };
             result.setCompletedAt(completedAt);
+            if (obj.has("category") && !obj.get("category").isJsonNull()) {
+                try {
+                    result.setCategory(QuestCategory.valueOf(obj.get("category").getAsString()));
+                } catch (IllegalArgumentException ignored) {
+                    result.setCategory(QuestCategory.GENERAL);
+                }
+            }
             return result;
 
         } catch (NullPointerException | IllegalArgumentException e) {

@@ -45,6 +45,9 @@ public abstract class Quest {
 
     /** Date et heure de complétion (null si pas encore terminée). */
     private LocalDateTime completedAt;
+
+    /** Catégorie de la quête. */
+    private QuestCategory category;
     /**
      * Construit une nouvelle quête avec les paramètres donnés.
      *
@@ -194,6 +197,24 @@ public abstract class Quest {
      */
     public void setCompletedAt(LocalDateTime completedAt) {
         this.completedAt = completedAt;
+    }
+
+    /**
+     * Retourne la catégorie de la quête.
+     *
+     * @return la catégorie (jamais null — retourne {@link QuestCategory#GENERAL} par défaut)
+     */
+    public QuestCategory getCategory() {
+        return category != null ? category : QuestCategory.GENERAL;
+    }
+
+    /**
+     * Définit la catégorie de la quête.
+     *
+     * @param category la catégorie
+     */
+    public void setCategory(QuestCategory category) {
+        this.category = category;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.taskquest.view;
 
 import com.taskquest.model.Quest;
+import com.taskquest.model.QuestCategory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,6 +26,9 @@ public class DialogForm extends JDialog {
 
     /** Case à cocher pour le type de quête (quotidienne ou unique). */
     private JCheckBox dailyCheckBox;
+
+    /** Menu déroulant pour la catégorie de la quête. */
+    private JComboBox<QuestCategory> categoryCombo;
 
     /** Indique si l'utilisateur a confirmé la création. */
     private boolean confirmed = false;
@@ -79,8 +83,16 @@ public class DialogForm extends JDialog {
         gbc.gridx = 1; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
         formPanel.add(xpSpinner, gbc);
 
+        // Catégorie
+        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 1; gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        formPanel.add(new JLabel("Catégorie :"), gbc);
+        categoryCombo = new JComboBox<>(QuestCategory.values());
+        gbc.gridx = 1; gbc.weightx = 1;
+        formPanel.add(categoryCombo, gbc);
+
         // Type quotidien
-        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2; gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2; gbc.fill = GridBagConstraints.HORIZONTAL;
         dailyCheckBox = new JCheckBox("Quête quotidienne (se réinitialise chaque jour)");
         formPanel.add(dailyCheckBox, gbc);
 
@@ -157,6 +169,15 @@ public class DialogForm extends JDialog {
      * @return {@code true} si quotidienne, {@code false} si unique
      */
     public boolean isDaily() { return dailyCheckBox.isSelected(); }
+
+    /**
+     * Retourne la catégorie sélectionnée.
+     *
+     * @return la catégorie choisie par l'utilisateur
+     */
+    public QuestCategory getCategory() {
+        return (QuestCategory) categoryCombo.getSelectedItem();
+    }
 
     // --- Classe interne : limitation de longueur sur les champs texte ---
 
